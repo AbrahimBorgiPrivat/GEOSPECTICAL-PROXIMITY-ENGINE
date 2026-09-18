@@ -1,6 +1,6 @@
-PWD c:\Users\Bruger\Documents\projekter\WORK\GEOSPECTICAL PROXIMITY ENGINE\Geospatial Proximity Engine\docs\poster
+PWD C:\Users\Bruger\Documents\projekter\PRIVATE\GEOSPECTICAL PROXIMITY ENGINE\docs\poster
 INPUT C:\Users\Bruger\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT c:\Users\Bruger\Documents\projekter\WORK\GEOSPECTICAL PROXIMITY ENGINE\Geospatial Proximity Engine\docs\poster\conference_poster_6.tex
+INPUT conference_poster_6.tex
 OUTPUT conference_poster_6.log
 INPUT .\a0poster.cls
 INPUT a0poster.cls

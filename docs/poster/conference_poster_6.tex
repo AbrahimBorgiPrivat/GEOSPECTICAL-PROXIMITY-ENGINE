@@ -57,7 +57,9 @@ on roads, paths, barriers, one-way restrictions or a selected travel profile.
 
 The objective is therefore to identify source--target pairs whose shortest
 directed network distance is at most a radius $r$, and then summarize the
-accepted targets by count and weight.
+accepted targets by count and weight. The radius may be stated in routed metres
+or duration; for a time radius, an assumed average movement speed supports
+candidate screening while OSRM evaluates the actual travel time.
 
 \begin{center}
   \includegraphics[width=\linewidth,height=18cm,keepaspectratio]{model2image.png}
@@ -157,7 +159,8 @@ Visualisation & Request OSRM route geometry and render it with Folium & Interact
 
 The computational interface returns a NumPy distance matrix, explicit accepted
 relations and both relation-based and unique weighted summaries. The same code
-supports walking, driving and cycling by changing only the OSRM profile.
+supports walking, driving and cycling by changing only the OSRM profile, with
+the radius expressed either as distance or duration.
 
 % -----------------------------------------------------------------------------
 % Applications

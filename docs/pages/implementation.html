@@ -55,9 +55,8 @@
           visualisation uses OSRM's route service separately to retrieve GeoJSON route geometries.
         </p>
         <p>
-          The radius can be expressed in metres or seconds. In duration mode, OSRM durations are compared directly;
-          the geographic screening radius is converted using the selected profile's default speed or a supplied
-          <code>speed_mps</code> value.
+          The radius can be expressed in metres or seconds; in duration mode, an assumed average profile speed
+          supports candidate screening while OSRM compares the actual travel durations.
         </p>
       </section>
 
