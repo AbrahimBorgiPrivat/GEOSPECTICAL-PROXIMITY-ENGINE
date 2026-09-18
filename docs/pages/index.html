@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geospatial Proximity Engine | Overview</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="home" data-page-title="Overview" data-page-subtitle="A concise guide to network-distance proximity classification">
+  <div class="app-shell">
+    <aside class="sidebar" data-sidebar></aside>
+    <div class="workspace">
+      <header class="topbar" data-topbar></header>
+      <main class="content">
+        <article class="prose">
+          <header class="article-header">
+            <div class="eyebrow">Overview</div>
+            <h1 class="article-title">Geospatial Proximity Engine</h1>
+            <p class="article-subtitle">
+              An exact, network-aware method for classifying weighted target locations by their directed route distance
+              from one or more sources.
+            </p>
+            <div class="article-byline">
+              <div class="author-avatar" aria-hidden="true">AB</div>
+              <div class="author-copy">
+                <div class="author-name">Abrahim Borgi</div>
+                <div class="author-role">Senior Business Analyst</div>
+              </div>
+            </div>
+            <div class="article-context">
+              <span>Geospatial Proximity Engine</span>
+              <span>Documentation overview</span>
+              <span>Graph model, algorithm and applications</span>
+            </div>
+          </header>
+
+          <figure class="figure-wide figure-hero">
+            <img src="assets/model2image.png" alt="Conceptual view of network-distance proximity classification">
+            <figcaption>Sources, targets and a routed radius together define the classification problem.</figcaption>
+          </figure>
+
+          <p>
+            Given a set of sources, the engine identifies the targets reachable within a specified network distance.
+            Proximity is measured along a directed transport network rather than as a straight line.
+          </p>
+          <p>
+            Targets may represent addresses, stores, service points or lead-related locations. Each target may carry
+            a weight that is aggregated after classification.
+          </p>
+          <p class="article-pullquote"><em>
+            Geographic distance is used only as a mathematically safe screen. Classification is decided by the
+            shortest routed distance on the network.
+          </em></p>
+          <p>
+            The documentation first defines the decision problem and its graph-theoretic basis. It then presents the
+            four-step algorithm, the Python and OSRM implementation, and a small set of practical applications.
+          </p>
+          <p>
+            The final pages apply the method to site, competitor and lead classification, present the generated
+            Folium map, and collect the central ideas in a concise conference poster.
+          </p>
+
+          <ul>
+            <li><strong>Introduction:</strong> the business and analytical problem.</li>
+            <li><strong>Theory:</strong> directed graphs, distance matrices and candidate pruning by the triangle inequality.</li>
+            <li><strong>Solution:</strong> candidate selection, routed matrix evaluation, radius filtering and aggregation.</li>
+            <li><strong>Implementation:</strong> Python orchestration and OSRM network distances.</li>
+            <li><strong>Applications:</strong> address coverage, competitive-site classification and weighted lead analysis.</li>
+            <li><strong>Poster:</strong> a compact visual summary of the theory, algorithm and use cases.</li>
+          </ul>
+
+          <nav class="article-navigation" aria-label="Documentation pages">
+            <a href="introduction.html"><div class="nav-label">Introduction</div><div class="nav-title">The proximity question</div><div class="nav-desc">Why a routed definition of near matters.</div></a>
+            <a href="theory.html"><div class="nav-label">Theory</div><div class="nav-title">Graph model and lower bound</div><div class="nav-desc">The formal basis for exact candidate pruning.</div></a>
+            <a href="solution.html"><div class="nav-label">Solution</div><div class="nav-title">Four algorithmic steps</div><div class="nav-desc">From candidates to weighted proximity measures.</div></a>
+            <a href="implementation.html"><div class="nav-label">Implementation</div><div class="nav-title">Python and OSRM</div><div class="nav-desc">How the graph query becomes a reusable calculation.</div></a>
+            <a href="applications.html"><div class="nav-label">Applications</div><div class="nav-title">Sites, stores and leads</div><div class="nav-desc">Use cases and a working Folium map.</div></a>
+            <a href="poster.html"><div class="nav-label">Poster</div><div class="nav-title">Conference poster</div><div class="nav-desc">View the concise visual summary of the project.</div></a>
+          </nav>
+        </article>
+      </main>
+      <footer class="footer" data-footer></footer>
+    </div>
+  </div>
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+services:
+  osrm_foot:
+    image: osrm/osrm-backend
+    container_name: osrm_foot
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data/osrm/foot:/data
+    command: >
+      osrm-routed --algorithm mld /data/denmark.osrm
+
+  osrm_car:
+    image: osrm/osrm-backend
+    container_name: osrm_car
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./data/osrm/car:/data
+    command: >
+      osrm-routed --algorithm mld /data/denmark.osrm
+      
+  osrm_bicycle:
+    image: osrm/osrm-backend
+    container_name: osrm_bicycle
+    ports:
+      - "5002:5000"
+    volumes:
+      - ./data/osrm/bicycle:/data
+    command: >
+      osrm-routed --algorithm mld /data/denmark.osrm

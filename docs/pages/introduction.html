@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geospatial Proximity Engine | Introduction</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="introduction" data-page-title="Introduction" data-page-subtitle="The decision problem behind routed proximity">
+  <div class="app-shell"><aside class="sidebar" data-sidebar></aside><div class="workspace">
+    <header class="topbar" data-topbar></header>
+    <main class="content"><article class="prose">
+      <header class="article-header">
+        <div class="eyebrow">Introduction</div>
+        <h1 class="article-title">Which Locations Are Actually Near a Site?</h1>
+        <p class="article-subtitle">Proximity is defined by the travel network, not by visual closeness on a map.</p>
+        <div class="article-byline"><div class="author-avatar" aria-hidden="true">AB</div><div class="author-copy"><div class="author-name">Abrahim Borgi</div><div class="author-role">Senior Business Analyst</div></div></div>
+        <div class="article-context"><span>Geospatial Proximity Engine</span><span>Introduction</span><span>Source-to-target classification</span></div>
+      </header>
+
+      <figure class="figure-wide figure-hero">
+        <img src="assets/frontpage.png" alt="Geospatial overview introducing a network-aware proximity decision">
+        <figcaption>Visual closeness is not sufficient when the decision criterion is distance along a transport network.</figcaption>
+      </figure>
+
+      <p>
+        Many geographic decisions begin with a simple rule: count the locations within $r$ metres of a site.
+        The rule becomes less obvious when “within” means walking, driving or cycling distance.
+      </p>
+      <p>
+        Rivers, railways, one-way streets and missing crossings can make nearby points far apart on the network.
+        Visual closeness is therefore not a reliable accessibility measure.
+      </p>
+      <p>
+        The engine takes sources $S$ and weighted targets $T$ and classifies every ordered pair $(s,t)$ by its
+        shortest feasible route distance.
+      </p>
+      <p>
+        This supports relation-level questions—<em>which target is close to which source?</em>—and aggregate
+        questions—<em>how much weighted opportunity lies within the radius?</em>
+      </p>
+
+      <p class="article-pullquote"><em>
+        The relevant object is not a circular buffer on a map. It is a reachability relation induced by a directed
+        network and a chosen travel profile.
+      </em></p>
+
+      <section id="decision-outputs">
+        <h2>Decision outputs</h2>
+        <div class="definition-table">
+          <div class="definition-row"><div class="definition-term">Relations</div><div class="definition-text">Every source–target pair whose routed distance satisfies the radius rule.</div></div>
+          <div class="definition-row"><div class="definition-term">Distance matrix</div><div class="definition-text">A source-by-target matrix retaining routed distances for accepted pairs and missing values otherwise.</div></div>
+          <div class="definition-row"><div class="definition-term">Weighted summary</div><div class="definition-text">Counts, total weight and unique-target measures that avoid double-counting the same coordinate.</div></div>
+        </div>
+      </section>
+
+      <section id="scope">
+        <h2>Scope</h2>
+        <p>
+          The algorithm is deliberately generic. A source may be a proposed site, a lead address, a depot or a
+          public-service facility.
+        </p>
+        <p>
+          A target may be a residence, a comparable store, a customer or another weighted point of interest. The
+          radius and OSRM profile make the same method usable for walking, driving and cycling accessibility.
+        </p>
+      </section>
+
+      <nav class="article-navigation" aria-label="Next page"><a href="theory.html"><div class="nav-label">Theory</div><div class="nav-title">Graph model and candidate pruning</div><div class="nav-desc">Why the straight-line screen cannot exclude a true routed match.</div></a></nav>
+    </article></main>
+    <footer class="footer" data-footer></footer>
+  </div></div>
+  <script src="assets/app.js"></script>
+</body>
+</html>

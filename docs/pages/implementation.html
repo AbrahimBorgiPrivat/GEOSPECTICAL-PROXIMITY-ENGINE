@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geospatial Proximity Engine | Implementation</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="implementation" data-page-title="Implementation" data-page-subtitle="Python orchestration with OSRM network distances">
+  <div class="app-shell"><aside class="sidebar" data-sidebar></aside><div class="workspace">
+    <header class="topbar" data-topbar></header>
+    <main class="content"><article class="prose">
+      <header class="article-header">
+        <div class="eyebrow">Implementation</div>
+        <h1 class="article-title">Python Screening, OSRM Routing</h1>
+        <p class="article-subtitle">A small implementation surface: validate inputs, prune safely, route candidates and aggregate.</p>
+        <div class="article-byline"><div class="author-avatar" aria-hidden="true">AB</div><div class="author-copy"><div class="author-name">Abrahim Borgi</div><div class="author-role">Senior Business Analyst</div></div></div>
+        <div class="article-context"><span>Geospatial Proximity Engine</span><span>Implementation</span><span>Python and OSRM</span></div>
+      </header>
+
+      <figure class="figure-wide figure-hero">
+        <img src="assets/implemtation.png" alt="Implementation overview for the Python and OSRM proximity workflow">
+        <figcaption>Python coordinates validation, candidate selection and aggregation; OSRM supplies directed network distances.</figcaption>
+      </figure>
+
+      <p>
+        The implementation preserves the mathematical decision rule while making routed-distance evaluation
+        practical.
+      </p>
+      <p>
+        Python handles validation, lower-bound screening and result assembly. OSRM computes shortest paths on the
+        selected transport network. This separation keeps the proximity definition independent of the application.
+      </p>
+
+      <section id="python">
+        <h2>Python calculation layer</h2>
+        <p>
+          The proximity module validates coordinates, non-negative weights and the radius. It then computes the
+          Haversine lower bound, selects candidate pairs and filters routed distances.
+        </p>
+        <p>
+          NumPy stores the source-by-target matrix. Entries that are not accepted use <code>numpy.nan</code>, keeping
+          the matrix shape explicit while separating matches from non-matches.
+        </p>
+      </section>
+
+      <section id="osrm">
+        <h2>OSRM as the directed distance oracle</h2>
+        <p>
+          <code>OSRMClient</code> resolves a local endpoint for the selected <code>foot</code>, <code>car</code> or
+          <code>bicycle</code> profile. It calls OSRM's table service for source-to-candidate distances.
+        </p>
+        <p>
+          Requests are chunked to respect coordinate limits and assembled into matrix blocks. The Folium
+          visualisation uses OSRM's route service separately to retrieve GeoJSON route geometries.
+        </p>
+        <p>
+          The radius can be expressed in metres or seconds. In duration mode, OSRM durations are compared directly;
+          the geographic screening radius is converted using the selected profile's default speed or a supplied
+          <code>speed_mps</code> value.
+        </p>
+      </section>
+
+      <section id="entry-point">
+        <h2>Reusable entry point</h2>
+        <pre class="code-example"><code class="language-python">from libraries.algoritm.algoritm import run_proximity
+
+distance_matrix, relations, summary = run_proximity(
+    sources=sources,
+    targets=targets,
+    radius=100,
+    profile="foot",
+)</code></pre>
+        <p>
+          The matrix provides distance evidence, the relations explain accepted pairs, and the summary provides
+          decision-ready counts and weights.
+        </p>
+      </section>
+
+      <nav class="article-navigation" aria-label="Next page"><a href="applications.html"><div class="nav-label">Applications</div><div class="nav-title">Lead and site classification</div><div class="nav-desc">Practical decision contexts and the Folium output.</div></a></nav>
+    </article></main>
+    <footer class="footer" data-footer></footer>
+  </div></div>
+  <script src="assets/app.js"></script>
+</body>
+</html>

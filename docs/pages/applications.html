@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geospatial Proximity Engine | Applications</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="applications" data-page-title="Applications" data-page-subtitle="Classifying local opportunity, competition and lead proximity">
+  <div class="app-shell"><aside class="sidebar" data-sidebar></aside><div class="workspace">
+    <header class="topbar" data-topbar></header>
+    <main class="content"><article class="prose">
+      <header class="article-header">
+        <div class="eyebrow">Applications</div>
+        <h1 class="article-title">Site, Address and Lead Classification</h1>
+        <p class="article-subtitle">One relation, several decision contexts: coverage, competitive context and lead potential.</p>
+        <div class="article-byline"><div class="author-avatar" aria-hidden="true">AB</div><div class="author-copy"><div class="author-name">Abrahim Borgi</div><div class="author-role">Senior Business Analyst</div></div></div>
+        <div class="article-context"><span>Geospatial Proximity Engine</span><span>Applications</span><span>Weighted network accessibility</span></div>
+      </header>
+
+      <p>
+        The engine is a classification component, not a complete site-selection model. It determines which targets
+        are reachable from each source under a chosen transport profile and radius.
+      </p>
+      <p>
+        Target weights give the relation a business meaning. A weight may represent population, addresses, revenue
+        potential, store size or category relevance. Because the calculation is consistent, results remain comparable
+        across candidate locations.
+      </p>
+
+      <section id="use-cases">
+        <h2>Representative use cases</h2>
+        <p>
+          These examples differ in business meaning but use the same source–target formulation. They are illustrative,
+          not an exhaustive list of possible applications.
+        </p>
+        <div class="table-wrap"><table class="comparison-table"><thead><tr><th>Decision context</th><th>Sources</th><th>Targets and output</th></tr></thead><tbody>
+          <tr><td>Address coverage</td><td>Candidate sites or service points</td><td>Residential addresses; count distinct reachable addresses and their weighted potential.</td></tr>
+          <tr><td>Competitive context</td><td>Own stores or proposed sites</td><td>Comparable-category stores; classify competitor count and weighted density within $n$ routed metres.</td></tr>
+          <tr><td>Lead parameters</td><td>Locations belonging to each lead</td><td>Lead-associated addresses; report accepted relations, weighted opportunity and unique coverage per lead.</td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section id="lead-classification">
+        <h2>Lead classification example</h2>
+        <p>
+          The included data assigns each lead one or more sources and a set of residential targets. Each lead is
+          evaluated independently, so routes are never constructed across leads.
+        </p>
+        <p>
+          The results are collected on one Folium map. Green targets and routes satisfy the network radius; red ones
+          do not. The map provides a visual audit trail alongside the count and weight measures.
+        </p>
+      </section>
+
+      <section id="folium-map">
+        <h2>Folium map output</h2>
+        <p>
+          The map is generated from the prepared lead data. It combines lead-specific calculations in one overview
+          while preserving each lead's independent source-to-target relations.
+        </p>
+        <iframe class="map-frame" title="Generated proximity map" src="assets/proximity_map.html" loading="lazy"></iframe>
+      </section>
+
+      <nav class="article-navigation" aria-label="Next page"><a href="poster.html"><div class="nav-label">Poster</div><div class="nav-title">Conference poster</div><div class="nav-desc">View the method, algorithm and applications in one concise visual summary.</div></a></nav>
+    </article></main>
+    <footer class="footer" data-footer></footer>
+  </div></div>
+  <script src="assets/app.js"></script>
+</body>
+</html>

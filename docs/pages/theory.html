@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geospatial Proximity Engine | Theory</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="theory" data-page-title="Theory" data-page-subtitle="Directed graphs, distance matrices and exact pruning">
+  <div class="app-shell"><aside class="sidebar" data-sidebar></aside><div class="workspace">
+    <header class="topbar" data-topbar></header>
+    <main class="content"><article class="prose">
+      <header class="article-header">
+        <div class="eyebrow">Theory</div>
+        <h1 class="article-title">A Shortest-Path Proximity Relation</h1>
+        <p class="article-subtitle">A compact graph model that justifies candidate selection exactly.</p>
+        <div class="article-byline"><div class="author-avatar" aria-hidden="true">AB</div><div class="author-copy"><div class="author-name">Abrahim Borgi</div><div class="author-role">Senior Business Analyst</div></div></div>
+        <div class="article-context"><span>Geospatial Proximity Engine</span><span>Theory</span><span>Directed shortest paths</span></div>
+      </header>
+
+      <figure class="figure-wide figure-hero">
+        <img src="assets/theory_network.png" alt="Road-following directed routes from two blue sources to nearby green and outer red candidates">
+        <figcaption>Each source is routed directly to every candidate; nearby relations are accepted in green, while longer outer relations are rejected in red.</figcaption>
+      </figure>
+
+      <section id="graph-model">
+        <h2>Graph and matrix formulation</h2>
+        <p>
+          Let $G=(V,E,w)$ be a directed travel graph with non-negative edge lengths. Let
+          $S=(s_1,\ldots,s_m)\subseteq V$ be the sources and $T=(t_1,\ldots,t_n)\subseteq V$ the targets.
+        </p>
+        <p>
+          The shortest-path distance $d_G(s_i,t_j)$ is directed and therefore need not equal $d_G(t_j,s_i)$.
+        </p>
+        <p>
+          For radius $r\geq0$, the accepted relation is
+          $$R_r=\{(i,j):d_G(s_i,t_j)\leq r\}.$$
+        </p>
+        <p>
+          The same evidence is retained in the source-by-target matrix
+          $$D_{ij}=d_G(s_i,t_j),\qquad D\in(\mathbb{R}_{\geq0}\cup\{\infty\})^{m\times n}.$$
+        </p>
+      </section>
+
+      <section id="triangle-inequality">
+        <h2>Candidate selection is a safe exclusion rule</h2>
+        <p>
+          Let $\delta(x,y)$ denote great-circle distance. Since $\delta$ is a metric, every path
+          $P=(v_0=s,\ldots,v_k=t)$ satisfies
+          $$\delta(s,t)\leq\sum_{\ell=1}^{k}\delta(v_{\ell-1},v_\ell)\leq
+          \sum_{\ell=1}^{k}w(v_{\ell-1},v_\ell).$$
+        </p>
+        <p>
+          Minimising the right-hand side over feasible directed paths gives $\delta(s,t)\leq d_G(s,t)$.
+        </p>
+        <p class="article-pullquote"><em>
+          If $\delta(s,t)>r$, then necessarily $d_G(s,t)>r$. The pair cannot be a routed match and may be removed
+          before any OSRM query without changing $R_r$.
+        </em></p>
+        <p>
+          Candidate selection therefore uses $C_r=\{(i,j):\delta(s_i,t_j)\leq r\}$. It is a lower-bound screen,
+          not an approximation. Every true routed match remains in $C_r$.
+        </p>
+        <p>
+          Retained pairs still require shortest-path evaluation: a short geographic distance does not guarantee a
+          short network route.
+        </p>
+      </section>
+
+      <nav class="article-navigation" aria-label="Next page"><a href="solution.html"><div class="nav-label">Solution</div><div class="nav-title">Four algorithmic steps</div><div class="nav-desc">Screen geographically, evaluate network distance, filter and aggregate.</div></a></nav>
+    </article></main>
+    <footer class="footer" data-footer></footer>
+  </div></div>
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geospatial Proximity Engine | Solution</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="solution" data-page-title="Solution" data-page-subtitle="A four-step exact proximity algorithm">
+  <div class="app-shell"><aside class="sidebar" data-sidebar></aside><div class="workspace">
+    <header class="topbar" data-topbar></header>
+    <main class="content"><article class="prose">
+      <header class="article-header">
+        <div class="eyebrow">Solution</div>
+        <h1 class="article-title">From Candidate Pairs to Weighted Proximity</h1>
+        <p class="article-subtitle">An exact decision rule, arranged as four deliberately small computational steps.</p>
+        <div class="article-byline"><div class="author-avatar" aria-hidden="true">AB</div><div class="author-copy"><div class="author-name">Abrahim Borgi</div><div class="author-role">Senior Business Analyst</div></div></div>
+        <div class="article-context"><span>Geospatial Proximity Engine</span><span>Solution</span><span>Screen, route, filter, aggregate</span></div>
+      </header>
+
+      <p>
+        The procedure first eliminates impossible matches with a proven lower bound, then uses the routed graph only
+        where it can affect the final decision. The output is the accepted relation, its distance evidence and a set
+        of weighted summaries.
+      </p>
+
+      <div class="process-flow" aria-label="Four-step algorithm">
+        <section>
+          <div class="process-step"><strong>1. Candidate selection</strong><br>Keep only pairs with $\delta(s_i,t_j)\leq r$.</div>
+          <p>The geographic lower bound removes pairs that cannot satisfy the network radius.</p>
+        </section>
+        <div class="process-arrow" aria-hidden="true">↓</div>
+        <section>
+          <div class="process-step"><strong>2. Directed distance matrix</strong><br>Evaluate $D_{ij}=d_G(s_i,t_j)$ for candidate pairs.</div>
+          <p>OSRM supplies the directed source-to-target shortest-path distances.</p>
+        </section>
+        <div class="process-arrow" aria-hidden="true">↓</div>
+        <section>
+          <div class="process-step"><strong>3. Radius decision</strong><br>Accept each pair for which $D_{ij}\leq r$.</div>
+          <p>The implementation uses an inclusive radius boundary; replace $\leq$ with $&lt;$ for a strict policy.</p>
+        </section>
+        <div class="process-arrow" aria-hidden="true">↓</div>
+        <section>
+          <div class="process-step"><strong>4. Aggregate accepted targets</strong><br>Count, weight and deduplicate the accepted targets.</div>
+          <p>Return relation count, sum of weights, unique-target count and unique sum of weights.</p>
+        </section>
+      </div>
+
+      <section id="result">
+        <h2>Result semantics</h2>
+        <p>The summaries distinguish repeated source–target relations from unique geographic coverage.</p>
+        <div class="table-wrap"><table class="comparison-table"><thead><tr><th>Measure</th><th>Meaning</th></tr></thead><tbody>
+          <tr><td>Accepted relations</td><td>Ordered source–target pairs within the routed radius.</td></tr>
+          <tr><td>Sum of weights</td><td>Weight summed per accepted relation.</td></tr>
+          <tr><td>Unique targets</td><td>Distinct target coordinates reached by at least one source.</td></tr>
+          <tr><td>Unique sum of weights</td><td>Weight counted once per distinct target coordinate.</td></tr>
+        </tbody></table></div>
+      </section>
+
+      <nav class="article-navigation" aria-label="Next page"><a href="implementation.html"><div class="nav-label">Implementation</div><div class="nav-title">Python and OSRM</div><div class="nav-desc">How the four steps are executed in the repository.</div></a></nav>
+    </article></main>
+    <footer class="footer" data-footer></footer>
+  </div></div>
+  <script src="assets/app.js"></script>
+</body>
+</html>
