@@ -5,6 +5,9 @@ boundary without requiring every test to call a live routing service.
 
 ## Coverage areas
 
+The service tests are in `services/geospatial_proximity/`, and runner tests are
+in `runner/`.
+
 - `algoritm/` — orchestration and the public `run_proximity` result;
 - `proximity/` — geographic distance, candidate selection, routed filtering
   and relation/weight aggregation;

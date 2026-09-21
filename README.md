@@ -46,6 +46,9 @@ the conference [poster](docs/pages/poster.html).
 
 Folder-specific documentation is available in:
 
+- [`src/services/geospatial-proximity/README.md`](src/services/geospatial-proximity/README.md) — HTTP service and Docker start-up;
+- [`src/libraries/runner/README.md`](src/libraries/runner/README.md) — command-line request runner;
+
 - [`docs/README.md`](docs/README.md) — documentation pages and assets;
 - [`src/README.md`](src/README.md) — source package structure;
 - [`src/libraries/README.md`](src/libraries/README.md) — reusable algorithm and OSRM code;
@@ -91,6 +94,19 @@ The local profiles are:
 | `bicycle` | `http://localhost:5002` |
 
 The large OSRM map and routing data are excluded from Git through `.gitignore`.
+
+## Run the HTTP service
+
+Start the service with:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path src).Path
+uvicorn --app-dir src/services/geospatial-proximity main:app --port 8000
+```
+
+Then call `POST /proximity` with the same `sources`, `targets` and `radius`
+input as `run_proximity`. The runner can submit the example request with
+`python -m libraries.runner.runner`.
 
 ## Run the algorithm
 

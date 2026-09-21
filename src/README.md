@@ -6,6 +6,10 @@ and the map-generation workflow.
 
 ## Structure
 
+The HTTP service is in `services/geospatial-proximity/` and the command-line
+runner is in `libraries/runner/`. Their short usage notes are in the local
+README files.
+
 - `libraries/` — proximity algorithm, validation, aggregation and OSRM client;
 - `services/osrm/` — Docker Compose configuration for local OSRM profiles;
 - `test/` — unit and integration-style tests;

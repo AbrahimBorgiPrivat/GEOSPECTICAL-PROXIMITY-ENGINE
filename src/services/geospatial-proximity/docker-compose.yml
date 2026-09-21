@@ -1,0 +1,13 @@
+services:
+  geospatial_proximity:
+    build:
+      context: ../../../
+      dockerfile: src/services/geospatial-proximity/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      OSRM_FOOT_URL: http://host.docker.internal:5000
+      OSRM_CAR_URL: http://host.docker.internal:5001
+      OSRM_BICYCLE_URL: http://host.docker.internal:5002
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

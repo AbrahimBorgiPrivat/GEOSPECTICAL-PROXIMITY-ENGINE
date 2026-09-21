@@ -1,0 +1,10 @@
+{
+  "sources": [
+    {"lon": 12.5683, "lat": 55.6761}
+  ],
+  "targets": [
+    {"lon": 12.569, "lat": 55.6765, "weight": 1}
+  ],
+  "radius": 500,
+  "profile": "foot"
+}
