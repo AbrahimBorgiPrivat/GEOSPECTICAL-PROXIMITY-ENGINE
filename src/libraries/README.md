@@ -1,62 +1,101 @@
 # Reusable libraries
 
-This directory contains the reusable calculation and routing components. The
-code is intentionally independent of the Folium presentation layer.
+This directory contains the reusable proximity algorithm, OSRM client and
+HTTP request runner. It is independent of the FastAPI service and the Folium
+visualisation layer.
 
-## `algoritm/`
+## Directory structure
 
-The proximity pipeline is implemented in two modules:
+```text
+src/libraries/
+├── __init__.py
+├── algoritm/
+│   ├── __init__.py
+│   ├── algoritm.py       # Public orchestration function
+│   └── proximity.py      # Distance, filtering and aggregation helpers
+├── classes/
+│   ├── __init__.py
+│   └── osrm_api.py       # OSRM table and route client
+├── runner/
+│   ├── __init__.py
+│   ├── proximity_request.json
+│   ├── runner.py         # Command-line HTTP client
+│   └── README.md
+└── README.md
+```
 
-- `algoritm.py` exposes `run_proximity`, validates inputs, orchestrates the
-  pipeline and assembles the returned matrix, relations and summary;
-- `proximity.py` contains the geographic lower bound, candidate selection,
-  routed-distance filtering and aggregation helpers.
+## Algorithm modules
 
-Candidate selection uses great-circle distance as a safe lower bound. Only pairs
-that can satisfy the radius are sent to OSRM, while the final decision uses the
-directed network distance.
+`algoritm/algoritm.py` exposes `run_proximity`. It validates the inputs,
+selects candidate pairs, requests routed values from OSRM, applies the active
+radius and returns:
 
-## `classes/`
+1. a NumPy source-by-target matrix;
+2. accepted source-target `relations` with coordinates, weights and `dist`;
+3. a `summary` with relation counts and weight totals.
 
-`osrm_api.py` contains `OSRMClient`, which supports:
+`algoritm/proximity.py` contains the reusable steps:
 
-- local `foot`, `car` and `bicycle` endpoints;
-- OSRM table requests for source-to-target distance matrices;
-- chunked table requests for larger inputs;
-- route requests with GeoJSON geometry for map visualisation.
+- great-circle geographic distance;
+- conservative candidate selection;
+- routed-distance or duration filtering;
+- relation and unique-target aggregation;
+- radius and movement-speed unit conversion.
+
+`classes/osrm_api.py` contains `OSRMClient`. It resolves the local `foot`,
+`car` and `bicycle` endpoints, supports explicit remote base URLs, performs
+OSRM table requests, splits large source/target collections into chunks and
+requests route geometries for map rendering.
 
 ## Basic usage
+
+From the repository root, make `src` available as the top-level package path:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path src).Path
+```
+
+Then call the public function:
 
 ```python
 from libraries.algoritm.algoritm import run_proximity
 
 distance_matrix, relations, summary = run_proximity(
-    sources=sources,
-    targets=targets,
-    radius=100,
+    sources=[{"lon": 12.5683, "lat": 55.6761}],
+    targets=[{"lon": 12.5690, "lat": 55.6765, "weight": 1}],
+    radius=500,
     profile="foot",
 )
 ```
 
-The default radius unit is `metres`. For a time radius, OSRM durations are used
-instead:
+The default unit is `metres`. For a time-based radius, use seconds through
+`distance_unit="duration"` (or the backwards-compatible `radius_unit`):
 
 ```python
 distance_matrix, relations, summary = run_proximity(
     sources=sources,
     targets=targets,
-    radius=900,
+    radius=15 * 60,
     distance_unit="duration",
     profile="foot",
-    speed_mps=1.6,  # optional override
+    speed_mps=1.6,
 )
 ```
 
-If `speed_mps` is omitted, the algorithm uses the profile defaults `foot=1.4`,
-`bicycle=5.6` and `car=13.9` metres per second. The speed converts seconds to
-the metre bound used during candidate selection; use a conservative upper-bound
-assumption when exact exclusion is required. In seconds mode, matrix values and
-the relation field `dist` are durations in seconds.
+When `speed_mps` is omitted, the profile defaults are `foot=1.4`,
+`bicycle=5.6` and `car=13.9` metres per second. This speed is used only to
+convert a duration radius into the geographic candidate-screen radius; OSRM
+still makes the final routed decision.
 
-Set `PYTHONPATH=src` when running the project from its repository root, or use
-the test configuration supplied in `pytest.ini`.
+## Runner
+
+`runner/runner.py` sends the example JSON in
+`runner/proximity_request.json` to `http://localhost:8000/proximity` and
+prints the response. With the API running and `PYTHONPATH` configured, run it
+from the repository root:
+
+```powershell
+python -m libraries.runner.runner
+```
+
+See [`runner/README.md`](runner/README.md) for the runner-specific details.

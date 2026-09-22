@@ -1,63 +1,86 @@
 # Geospatial Proximity Engine
 
 The Geospatial Proximity Engine classifies target locations by their shortest
-directed travel distance from one or more sources. It is designed for questions
-such as: which addresses are reachable from a site within a given radius, how
-many comparable stores are nearby, or which leads have the greatest local
-opportunity?
+directed travel distance from one or more sources. It is designed for
+questions such as which addresses are reachable from a site within a radius,
+how many comparable locations are nearby, or which leads have the greatest
+local opportunity.
 
-The central distinction is between geographic distance and network distance.
-Straight-line distance is used as a safe lower-bound screen, while OSRM provides
-the final route distance over the directed transport network. This preserves the
-effect of roads, barriers, one-way restrictions and the selected travel profile.
+The engine separates geographic distance from network distance. Great-circle
+distance is used as a conservative candidate screen, while OSRM supplies the
+final directed route distance or travel duration. This preserves the effect of
+roads, barriers, one-way restrictions and the selected travel profile.
+
+## Repository structure
+
+```text
+.
+├── .github/workflows/                 # CI workflow configuration
+├── docs/
+│   ├── pages/                          # Static HTML documentation and assets
+│   ├── poster/                         # LaTeX source and figures for the poster
+│   └── README.md
+├── src/
+│   ├── libraries/
+│   │   ├── algoritm/                   # Proximity pipeline
+│   │   ├── classes/                    # OSRMClient
+│   │   ├── runner/                     # HTTP request runner and example JSON
+│   │   └── README.md
+│   ├── services/
+│   │   ├── geospatial-proximity/       # FastAPI service
+│   │   └── osrm/                       # Local OSRM Docker setup
+│   ├── test/
+│   │   ├── algoritm/
+│   │   ├── osrm_api/
+│   │   ├── proximity/
+│   │   ├── runner/
+│   │   ├── services/geospatial_proximity/
+│   │   └── README.md
+│   ├── visulation/
+│   │   ├── data/                       # Prepared JSON input data
+│   │   ├── output/                     # Generated maps and exports (gitignored)
+│   │   ├── generate_proximity_maps.py
+│   │   └── README.md
+│   └── README.md
+├── .gitignore
+├── pytest.ini
+├── requriement.txt                    # Repository dependency list
+└── README.md
+```
+
+The generated OSRM map data under `src/services/osrm/data/` and generated
+visualisation output under `src/visulation/output/` are excluded from Git.
 
 ## Method
 
-Let `G = (V, E, w)` be a directed graph with non-negative edge lengths, `S` the
-sources and `T` the targets. For a radius `r`, the engine applies four steps:
+For a directed graph `G = (V, E, w)`, sources `S`, targets `T` and radius `r`,
+the pipeline is:
 
-1. Select candidate source-target pairs whose great-circle distance is at most `r`.
-2. Query OSRM for the directed source-to-target distance matrix of those pairs.
-3. Accept a relation when its routed distance is at most `r`.
-4. Return relation counts, weighted sums, unique targets and unique weighted sums.
+1. select source-target pairs whose great-circle distance is at most `r`;
+2. query OSRM for the directed source-to-target table values of those pairs;
+3. accept a relation when its routed distance or duration is at most `r`;
+4. return the matrix, accepted relations and aggregate summaries.
 
-The candidate screen is exact as an exclusion rule. By the triangle inequality,
-great-circle distance is no greater than the length of any feasible route. Thus,
-when the geographic distance exceeds `r`, the routed distance must also exceed
-`r`; no true match is removed before routing.
+The geographic screen is safe as an exclusion rule: great-circle distance is
+never greater than a feasible route distance. A pair outside the geographic
+bound therefore cannot be a routed match.
 
-## Outputs
+## Documentation map
 
-`run_proximity` returns:
-
-- a NumPy source-by-target distance matrix;
-- accepted source-target relations with coordinates, weights and distances;
-- summary measures for relation-based and unique target coverage.
-
-Distances and radii use metres by default. A radius can also be expressed in
-seconds, in which case OSRM travel durations are used. The default OSRM profile
-is `foot`, with `car` and `bicycle` also supported.
-
-## Documentation
-
-Open the [documentation overview](docs/pages/index.html) for the introduction,
-formal theory, four-step solution, Python/OSRM implementation, applications and
-the conference [poster](docs/pages/poster.html).
-
-Folder-specific documentation is available in:
-
-- [`src/services/geospatial-proximity/README.md`](src/services/geospatial-proximity/README.md) — HTTP service and Docker start-up;
+- [`src/services/geospatial-proximity/README.md`](src/services/geospatial-proximity/README.md) — HTTP API and Docker startup;
+- [`src/services/osrm/README.md`](src/services/osrm/README.md) — local OSRM data and containers;
+- [`src/libraries/README.md`](src/libraries/README.md) — reusable algorithm, OSRM client and runner;
 - [`src/libraries/runner/README.md`](src/libraries/runner/README.md) — command-line request runner;
-
-- [`docs/README.md`](docs/README.md) — documentation pages and assets;
-- [`src/README.md`](src/README.md) — source package structure;
-- [`src/libraries/README.md`](src/libraries/README.md) — reusable algorithm and OSRM code;
 - [`src/test/README.md`](src/test/README.md) — test organization and commands;
-- [`src/visulation/README.md`](src/visulation/README.md) — Folium map generation.
+- [`src/visulation/README.md`](src/visulation/README.md) — Folium map generation;
+- [`docs/README.md`](docs/README.md) — static documentation pages and assets.
+
+The browser documentation is available from
+[`docs/pages/index.html`](docs/pages/index.html).
 
 ## Setup
 
-Create and activate a Python virtual environment from the project root:
+Create and activate a Python virtual environment from the repository root:
 
 ```powershell
 python -m venv .venv
@@ -66,26 +89,18 @@ python -m pip install --upgrade pip
 pip install -r requriement.txt
 ```
 
-On Git Bash, activate the environment with:
+The repository keeps the existing dependency filename `requriement.txt`.
 
-```bash
-source .venv/Scripts/activate
-```
+## Start local OSRM
 
-The repository currently uses the existing filename `requriement.txt` for its
-dependency list.
-
-## Start OSRM
-
-Docker Desktop must be running. Start the Denmark OSRM services from the project
-root:
+Docker Desktop must be running. Follow the preparation steps in
+[`src/services/osrm/README.md`](src/services/osrm/README.md), then start the
+three local profiles:
 
 ```powershell
 cd src/services/osrm
 docker compose up
 ```
-
-The local profiles are:
 
 | Profile | Endpoint |
 |---|---|
@@ -93,31 +108,22 @@ The local profiles are:
 | `car` | `http://localhost:5001` |
 | `bicycle` | `http://localhost:5002` |
 
-The large OSRM map and routing data are excluded from Git through `.gitignore`.
-
 ## Run the HTTP service
 
-Start the service with:
+From the repository root, start the API after OSRM is available:
 
 ```powershell
 $env:PYTHONPATH = (Resolve-Path src).Path
 uvicorn --app-dir src/services/geospatial-proximity main:app --port 8000
 ```
 
-Then call `POST /proximity` with the same `sources`, `targets` and `radius`
-input as `run_proximity`. The runner can submit the example request with
-`python -m libraries.runner.runner`.
+The service exposes `GET /health`, `POST /proximity` and interactive OpenAPI
+documentation at `GET /docs`. It can also be built with the Compose file in
+`src/services/geospatial-proximity/`.
 
-## Run the algorithm
+## Run the reusable algorithm
 
-The package imports use `libraries` as the top-level source package. From
-PowerShell, expose `src` on `PYTHONPATH` before running examples:
-
-```powershell
-$env:PYTHONPATH = (Resolve-Path src).Path
-```
-
-Then the reusable calculation can be called as follows:
+With `src` on `PYTHONPATH`, import the public entry point:
 
 ```python
 from libraries.algoritm.algoritm import run_proximity
@@ -130,51 +136,36 @@ distance_matrix, relations, summary = run_proximity(
 )
 ```
 
-The matrix contains accepted routed distances and `numpy.nan` for non-matches.
-The relation list contains the accepted source-target pairs, and `summary`
-contains the aggregate measures described above.
+The default unit is metres. Set `distance_unit="duration"` to compare OSRM
+travel times in seconds; `speed_mps` can override the profile-specific speed
+used for the geographic candidate screen.
 
-When `distance_unit="duration"`, the matrix and each relation's `dist` value
-are travel times in seconds rather than distances in metres.
+## Run the request runner
 
-For a time-based radius, set `distance_unit="duration"`. The default movement
-speed is profile-specific: 1.4 m/s for walking, 5.6 m/s for cycling and
-13.9 m/s for driving. Override it with `speed_mps` when a different movement
-assumption is appropriate:
+After starting the API and configuring `PYTHONPATH`, submit the example request
+from `src/libraries/runner/proximity_request.json`:
 
-```python
-distance_matrix, relations, summary = run_proximity(
-    sources=sources,
-    targets=targets,
-    radius=15 * 60,
-    distance_unit="duration",
-    profile="foot",
-    speed_mps=1.6,
-)
+```powershell
+python -m libraries.runner.runner
 ```
-
-The speed is used to convert the time radius to a geographic metre bound for
-candidate selection. For the exclusion argument to remain conservative, use a
-speed that is an upper-bound movement assumption for the chosen profile.
 
 ## Generate the Folium map
 
-With OSRM running and `PYTHONPATH` configured, generate the combined map for the
-prepared visualisation data:
+The current prepared visualisation inputs are
+`src/visulation/data/proximity_sources_500m.json` and
+`src/visulation/data/proximity_targets_500m.json`. With OSRM running:
 
 ```powershell
-python -m src.visulation.generate_proximity_maps --radius 100 --profile foot
+$env:PYTHONPATH = (Resolve-Path src).Path
+python -m src.visulation.generate_proximity_maps `
+  --sources src/visulation/data/proximity_sources_500m.json `
+  --targets src/visulation/data/proximity_targets_500m.json `
+  --radius 500 `
+  --profile foot
 ```
 
-To generate a walking-time map instead, use for example:
-
-```powershell
-python -m src.visulation.generate_proximity_maps --radius 900 --distance-unit duration --profile foot
-```
-
-The HTML map and its distance export are written to `src/visulation/output/`.
-The map uses light OpenStreetMap tiles, blue sources, green accepted targets and
-routes, and red rejected routes and targets.
+The generated HTML map and JSON distance export are written to
+`src/visulation/output/`.
 
 ## Run tests
 
@@ -182,5 +173,6 @@ routes, and red rejected routes and targets.
 pytest
 ```
 
-The test suite covers candidate selection, distance filtering, aggregation,
-OSRM URL/profile handling and chunked table requests.
+The suite covers candidate selection, distance and duration filtering,
+aggregation, OSRM URL/profile resolution, chunked table requests, the HTTP
+service and the request runner.

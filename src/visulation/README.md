@@ -8,8 +8,8 @@ not redefine the distance logic.
 
 The default files are:
 
-- `data/proximity_sources_100m_residential.json`;
-- `data/proximity_targets_100m_residential.json`.
+- `data/proximity_sources_500m_residential.json`;
+- `data/proximity_targets_500m_residential.json`.
 
 Records are grouped by `lead_id`. Each source or target location contains
 `lon` and `lat`; targets also contain a non-negative `weight`.
