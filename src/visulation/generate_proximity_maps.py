@@ -7,7 +7,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Mapping, Sequence
-
+from tqdm import tqdm
 import folium
 
 from libraries.algoritm.algoritm import DISTANCE_UNIT, run_proximity
@@ -17,7 +17,7 @@ from libraries.classes.osrm_api import OSRMClient
 
 DEFAULT_DATA_DIR = Path(__file__).parent / "data"
 DEFAULT_OUTPUT_DIR = Path(__file__).parent / "output"
-DEFAULT_RADIUS_METERS = 100.0
+DEFAULT_RADIUS_METERS = 500.0
 DEFAULT_RADIUS_UNIT = DISTANCE_UNIT
 
 
@@ -94,13 +94,19 @@ def _fit_map_to_points(
 def _add_osrm_routes(
     proximity_map: folium.Map,
     relations: Sequence[Mapping[str, float]],
+    candidates: Sequence[tuple[int, int, float]],
     sources: Sequence[Mapping[str, float]],
     targets: Sequence[Mapping[str, float]],
     osrm_client: OSRMClient,
     profile: str,
     radius_unit: str,
 ) -> None:
-    """Draw OSRM routes for every source-to-target pair."""
+    """Draw routes for geographic candidates only.
+
+    Candidates are within the straight-line radius. Accepted relations are
+    shown in green; candidates rejected by the routed-distance check are
+    shown in red.
+    """
     red_routes_layer = folium.FeatureGroup(
         name="OSRM routes - outside radius", show=True
     )
@@ -115,57 +121,49 @@ def _add_osrm_routes(
         (int(relation["source_index"]), int(relation["target_index"]))
         for relation in relations
     }
-    matched_target_indices = {target_index for _, target_index in matched_pairs}
     metric_key = "duration" if radius_unit == "duration" else "distance"
     metric_label = "s" if radius_unit == "duration" else "m"
 
-    for source_index, source in enumerate(sources):
-        for target_index, target in enumerate(targets):
-            # Do not clutter a matched target with red routes from other sources.
-            if (
-                target_index in matched_target_indices
-                and (source_index, target_index) not in matched_pairs
-            ):
-                continue
-            response = osrm_client.route(
-                [
-                    {"lon": float(source["lon"]), "lat": float(source["lat"])},
-                    {"lon": float(target["lon"]), "lat": float(target["lat"])},
-                ],
-                overview="full",
-                geometries="geojson",
-                profile=profile,
-            )
-            routes = response.get("routes", [])
-            if not routes:
-                continue
+    for source_index, target_index, _ in candidates:
+        source = sources[source_index]
+        target = targets[target_index]
+        response = osrm_client.route(
+            [
+                {"lon": float(source["lon"]), "lat": float(source["lat"])},
+                {"lon": float(target["lon"]), "lat": float(target["lat"])},
+            ],
+            overview="full",
+            geometries="geojson",
+            profile=profile,
+        )
+        routes = response.get("routes", [])
+        if not routes:
+            continue
 
-            route = routes[0]
-            coordinates = route.get("geometry", {}).get("coordinates", [])
-            if len(coordinates) < 2:
-                continue
+        route = routes[0]
+        coordinates = route.get("geometry", {}).get("coordinates", [])
+        if len(coordinates) < 2:
+            continue
 
-            # GeoJSON uses [longitude, latitude], while Folium expects [latitude, longitude].
-            route_line = folium.PolyLine(
-                locations=[
-                    (latitude, longitude) for longitude, latitude in coordinates
-                ],
-                color=(
-                    "#16a34a"
-                    if (source_index, target_index) in matched_pairs
-                    else "#dc2626"
-                ),
-                weight=2,
-                opacity=0.75,
-                tooltip=(
-                    f"Source {source_index} -> Target {target_index}: "
-                    f"{float(route.get(metric_key, 0.0)):.1f} {metric_label}"
-                ),
-            )
-            if (source_index, target_index) in matched_pairs:
-                route_line.add_to(green_routes_layer)
-            else:
-                route_line.add_to(red_routes_layer)
+        # GeoJSON uses [longitude, latitude], while Folium expects [latitude, longitude].
+        route_line = folium.PolyLine(
+            locations=[(latitude, longitude) for longitude, latitude in coordinates],
+            color=(
+                "#16a34a"
+                if (source_index, target_index) in matched_pairs
+                else "#dc2626"
+            ),
+            weight=2,
+            opacity=0.75,
+            tooltip=(
+                f"Source {source_index} -> Target {target_index}: "
+                f"{float(route.get(metric_key, 0.0)):.1f} {metric_label}"
+            ),
+        )
+        if (source_index, target_index) in matched_pairs:
+            route_line.add_to(green_routes_layer)
+        else:
+            route_line.add_to(red_routes_layer)
 
 
 def build_lead_map(
@@ -234,6 +232,7 @@ def build_lead_map(
     _add_osrm_routes(
         proximity_map,
         relations,
+        candidates,
         sources,
         targets,
         client,
@@ -344,7 +343,7 @@ def generate_maps(
     results: list[dict[str, Any]] = []
     all_sources = []
     all_targets = []
-    for lead_id in lead_ids:
+    for lead_id in tqdm(lead_ids, desc="Generating proximity maps", unit="lead"):
         lead_map, result = build_lead_map(
             lead_id,
             sources_by_lead.get(lead_id, []),
@@ -377,12 +376,12 @@ def main() -> None:
     parser.add_argument(
         "--sources",
         type=Path,
-        default=DEFAULT_DATA_DIR / "proximity_sources_100m_residential.json",
+        default=DEFAULT_DATA_DIR / "proximity_sources_500m.json",
     )
     parser.add_argument(
         "--targets",
         type=Path,
-        default=DEFAULT_DATA_DIR / "proximity_targets_100m_residential.json",
+        default=DEFAULT_DATA_DIR / "proximity_targets_500m.json",
     )
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--radius", type=float, default=DEFAULT_RADIUS_METERS)
